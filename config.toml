@@ -1,0 +1,9 @@
+baseURL = 'https://example.com/'
+languageCode = 'zh-cn'
+title = 'PC Station Blog'
+theme = 'hugo-xp'
+publishDir = 'public'
+
+[markup]
+  [markup.highlight]
+    codeFences = true
