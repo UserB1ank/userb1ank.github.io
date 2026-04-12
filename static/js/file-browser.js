@@ -69,16 +69,15 @@ class FileBrowser {
     }
 
     try {
-      // 尝试获取 JSON 格式的渲染后内容
       const response = await fetch(`/posts/${slug}/index.json`);
       if (response.ok) {
         const data = await response.json();
-        const content = await renderMarkdown(data.content || '');
-        this.cache.set(cacheKey, content);
-        return content;
+        // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
+        this.cache.set(cacheKey, data.content || '');
+        return data.content || '<p>文章内容为空</p>';
       }
     } catch (e) {
-      // JSON 不存在，尝试直接获取 markdown
+      console.error('Failed to load post:', e);
     }
 
     // 回退到直接获取 markdown
@@ -183,16 +182,15 @@ class FileBrowser {
     }
 
     try {
-      // 尝试 JSON
       const response = await fetch('/about/index.json');
       if (response.ok) {
         const data = await response.json();
-        const content = await renderMarkdown(data.content || '');
-        this.cache.set(cacheKey, content);
-        return content;
+        // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
+        this.cache.set(cacheKey, data.content || '');
+        return data.content || '<p>关于页面内容为空</p>';
       }
     } catch (e) {
-      // 忽略
+      console.error('Failed to load about:', e);
     }
 
     // 回退到 markdown
