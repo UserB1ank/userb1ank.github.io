@@ -215,12 +215,7 @@ class FileBrowser {
         item.addEventListener('dblclick', () => {
           const path = item.dataset.path;
           if (path) {
-            windowManager.navigate(this.windowId);
-            // 直接设置地址栏并导航
-            const addressBar = document.getElementById(`address-${this.windowId}`);
-            if (addressBar) {
-              addressBar.value = path;
-            }
+            // 直接使用 FileBrowser 的 navigate，它会正确更新地址栏和历史
             this.navigate(path);
           }
         });
