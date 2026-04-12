@@ -102,7 +102,8 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch('/posts-list.json');
+      // 使用 index.json 作为文章列表
+      const response = await fetch('/index.json');
       if (response.ok) {
         const posts = await response.json();
         const html = renderFileList(posts);
@@ -113,8 +114,7 @@ class FileBrowser {
       // 忽略错误
     }
 
-    // 如果 JSON 不存在，返回提示
-    return '<p style="padding: 20px; color: #666;">请在 Hugo 中生成 posts-list.json</p>';
+    return '<p style="padding: 20px; color: #666;">无法加载文章列表</p>';
   }
 
   async loadCategoryList() {
@@ -125,9 +125,21 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch('/categories.json');
+      // 从 index.json 构建分类列表
+      const response = await fetch('/index.json');
       if (response.ok) {
-        const categories = await response.json();
+        const posts = await response.json();
+        const categoryMap = {};
+        posts.forEach(post => {
+          if (post.category) {
+            if (categoryMap[post.category]) {
+              categoryMap[post.category]++;
+            } else {
+              categoryMap[post.category] = 1;
+            }
+          }
+        });
+        const categories = Object.entries(categoryMap).map(([name, count]) => ({ name, count }));
         const html = renderCategoryList(categories);
         this.cache.set(cacheKey, html);
         return html;
@@ -136,7 +148,7 @@ class FileBrowser {
       // 忽略错误
     }
 
-    return '<p style="padding: 20px; color: #666;">请在 Hugo 中生成 categories.json</p>';
+    return '<p style="padding: 20px; color: #666;">无法加载分类列表</p>';
   }
 
   async loadCategory(name) {
@@ -147,10 +159,12 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch(`/categories/${encodeURIComponent(name)}.json`);
+      // 从 index.json 过滤该分类下的文章
+      const response = await fetch('/index.json');
       if (response.ok) {
         const posts = await response.json();
-        const html = renderFileList(posts);
+        const filteredPosts = posts.filter(post => post.category === name);
+        const html = renderFileList(filteredPosts);
         this.cache.set(cacheKey, html);
         return html;
       }
