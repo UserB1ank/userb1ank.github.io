@@ -1,7 +1,8 @@
 // static/js/markdown-renderer.js
 
 // 简单的 Markdown 渲染器 (不使用外部库)
-export async function renderMarkdown(content) {
+// 挂载到全局
+window.renderMarkdown = async function(content) {
   let html = content;
 
   // 转义 HTML
@@ -71,7 +72,7 @@ export async function renderMarkdown(content) {
   return html;
 }
 
-export function renderFileList(files) {
+window.renderFileList = function(files) {
   if (!files || files.length === 0) {
     return '<p style="padding: 20px; color: #666;">暂无内容</p>';
   }
@@ -87,7 +88,7 @@ export function renderFileList(files) {
   `).join('');
 }
 
-export function renderCategoryList(categories) {
+window.renderCategoryList = function(categories) {
   if (!categories || categories.length === 0) {
     return '<p style="padding: 20px; color: #666;">暂无分类</p>';
   }
