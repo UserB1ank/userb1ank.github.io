@@ -1,0 +1,1 @@
+{{- dict "title" .Title "date" (.Date.Format "2006-01-02") "content" .Content "category" .Params.category | jsonify -}}

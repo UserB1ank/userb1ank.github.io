@@ -7,3 +7,8 @@ publishDir = 'public'
 [markup]
   [markup.highlight]
     codeFences = true
+
+[outputs]
+  home = ["HTML", "JSON"]
+  section = ["HTML", "JSON"]
+  page = ["HTML", "JSON"]

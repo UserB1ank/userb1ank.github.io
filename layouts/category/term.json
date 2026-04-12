@@ -1,0 +1,16 @@
+{{- $.Scratch.Set "categories" slice -}}
+{{- range .Site.Home.RegularPages -}}
+  {{- if .Params.category -}}
+    {{- $cat := .Params.category -}}
+    {{- $found := false -}}
+    {{- range $.Scratch.GetSortedMapValues "categories" -}}
+      {{- if eq .name $cat -}}
+        {{- $found = true -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $found -}}
+      {{- $.Scratch.Add "categories" (dict "name" $cat "count" (len (where $.Site.RegularPages "Params.category" $cat))) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $.Scratch.Get "categories" | jsonify -}}

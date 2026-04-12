@@ -1,0 +1,17 @@
+{{- $categories := slice -}}
+{{- $categoryMap := dict -}}
+{{- range .Site.RegularPages -}}
+  {{- if .Params.category -}}
+    {{- $cat := .Params.category -}}
+    {{- if index $categoryMap $cat -}}
+      {{- $count := add (index $categoryMap $cat) 1 -}}
+      {{- $categoryMap = merge $categoryMap (dict $cat $count) -}}
+    {{- else -}}
+      {{- $categoryMap = merge $categoryMap (dict $cat 1) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $name, $count := $categoryMap -}}
+  {{- $categories = $categories | append (dict "name" $name "count" $count) -}}
+{{- end -}}
+{{- $categories | jsonify -}}
