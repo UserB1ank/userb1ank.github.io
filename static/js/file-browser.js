@@ -22,10 +22,19 @@ class FileBrowser {
 
     try {
       let data;
+      console.log('navigate called with path:', path);
+      console.log('startsWith /posts/:', path.startsWith('/posts/'));
+      console.log('endsWith /:', path.endsWith('/'));
       if (path.startsWith('/posts/') && path.endsWith('/')) {
         // 阅读文章
+        console.log('Loading post...');
         data = await this.loadPost(path);
-        if (content) content.innerHTML = `<div class="markdown-body">${data}</div>`;
+        console.log('Post loaded, data:', data);
+        if (content) {
+          console.log('Setting content HTML, length:', data.length);
+          content.innerHTML = `<div class="markdown-body">${data}</div>`;
+          console.log('Content set, actual HTML:', content.innerHTML);
+        }
       } else if (path.startsWith('/category/') && path.endsWith('/')) {
         // 分类下的文章列表
         const category = decodeURIComponent(path.replace('/category/', '').replace('/', ''));
@@ -72,9 +81,14 @@ class FileBrowser {
       const response = await fetch(`/posts/${slug}/index.json`);
       if (response.ok) {
         const data = await response.json();
+        console.log('loadPost - JSON data:', data);
+        console.log('loadPost - content:', data.content);
         // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
-        this.cache.set(cacheKey, data.content || '');
-        return data.content || '<p>文章内容为空</p>';
+        const content = data.content || '';
+        this.cache.set(cacheKey, content);
+        return content || '<p>文章内容为空</p>';
+      } else {
+        console.error('loadPost - response not ok:', response.status);
       }
     } catch (e) {
       console.error('Failed to load post:', e);
