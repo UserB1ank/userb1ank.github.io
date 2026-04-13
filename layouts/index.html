@@ -4,34 +4,101 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PC Station</title>
-  <link rel="stylesheet" href="/css/xp.css">
-  <link rel="stylesheet" href="/css/intro.css">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
       overflow: hidden;
-      background: #0a0a1a;
+      background: #000;
+      font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    #scene-container {
-      position: relative;
+    /* Boot Screen */
+    #boot-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+      opacity: 1;
+      transition: opacity 0.4s ease-out;
     }
-    #canvas-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    #label-container {
-      position: absolute;
-      top: 0;
-      left: 0;
+    #boot-screen.hidden {
+      opacity: 0;
       pointer-events: none;
     }
-    #label-container .desktop-3d {
-      pointer-events: auto;
+    /* Windows 11 Logo - Fluent Design */
+    .windows-logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: scale(0.9);
+      animation: logoReveal 0.6s ease-out 0.3s forwards;
     }
-    /* Scanline effect */
+    @keyframes logoReveal {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .windows-logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 40px rgba(0, 120, 212, 0.3));
+    }
+    /* Loading dots */
+    .loading-dots {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeIn 0.4s ease-out 0.6s forwards;
+    }
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Progress bar - subtle */
+    .progress-container {
+      width: 200px;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 30px;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 0.4s ease-out 0.5s forwards;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0078d4, #60cdff);
+      border-radius: 2px;
+      animation: win11Progress 3s ease-out 0.8s forwards;
+    }
+    @keyframes win11Progress {
+      0% { width: 0%; }
+      30% { width: 35%; }
+      60% { width: 65%; }
+      85% { width: 88%; }
+      100% { width: 100%; }
+    }
+    /* Scanlines */
     .scanlines {
       position: fixed;
       top: 0;
@@ -39,388 +106,50 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 9999;
       background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.1) 0px,
-        rgba(0, 0, 0, 0.1) 1px,
+        rgba(0, 0, 0, 0.03) 0px,
+        rgba(0, 0, 0, 0.03) 1px,
         transparent 1px,
         transparent 2px
       );
-      opacity: 0.3;
-    }
-    /* CRT glow effect */
-    .crt-glow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9998;
-      box-shadow: inset 0 0 150px rgba(0, 255, 255, 0.1);
-    }
-    /* Loading screen */
-    #loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #0a0a1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      color: #00ffff;
-      font-family: Tahoma, sans-serif;
-      font-size: 14px;
-    }
-    #loading.hidden {
-      opacity: 0;
-      transition: opacity 0.5s;
-      pointer-events: none;
+      z-index: 20001;
     }
   </style>
 </head>
 <body>
-  <div id="loading">正在启动系统...</div>
-  <div id="scene-container">
-    <div id="canvas-container"></div>
-    <div id="label-container"></div>
+  <div id="boot-screen">
+    <div class="windows-logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Windows 11 logo - 4 colored panes -->
+        <!-- Top-left: Blue -->
+        <rect x="10" y="10" width="38" height="38" rx="4" fill="#0078d4"/>
+        <!-- Top-right: Red -->
+        <rect x="52" y="10" width="38" height="38" rx="4" fill="#f25022"/>
+        <!-- Bottom-left: Green -->
+        <rect x="10" y="52" width="38" height="38" rx="4" fill="#7fba00"/>
+        <!-- Bottom-right: Yellow -->
+        <rect x="52" y="52" width="38" height="38" rx="4" fill="#ffb900"/>
+      </svg>
+    </div>
+    <div class="loading-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="progress-container">
+      <div class="progress-fill"></div>
+    </div>
   </div>
   <div class="scanlines"></div>
-  <div class="crt-glow"></div>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
-    // ============================================
-    // Scene Setup
-    // ============================================
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0a1a);
-    scene.fog = new THREE.Fog(0x0a0a1a, 8, 30);
-
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    // CSS2DRenderer for HTML in 3D
-    const labelRenderer = new CSS2DRenderer();
-    labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    labelRenderer.domElement.style.position = 'absolute';
-    labelRenderer.domElement.style.top = '0px';
-    labelRenderer.domElement.style.left = '0px';
-    labelRenderer.domElement.style.pointerEvents = 'none';
-    document.getElementById('scene-container').appendChild(labelRenderer.domElement);
-
-    // ============================================
-    // Lighting
-    // ============================================
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-    scene.add(ambientLight);
-
-    const cyanLight = new THREE.PointLight(0x00ffff, 2, 50);
-    cyanLight.position.set(5, 5, 5);
-    scene.add(cyanLight);
-
-    const pinkLight = new THREE.PointLight(0xff00ff, 1.5, 50);
-    pinkLight.position.set(-5, -2, 3);
-    scene.add(pinkLight);
-
-    const screenLight = new THREE.PointLight(0x4488ff, 1, 20);
-    screenLight.position.set(0, 0, 2);
-    scene.add(screenLight);
-
-    // ============================================
-    // CRT Monitor Model
-    // ============================================
-    function createCRTMonitor() {
-      const monitor = new THREE.Group();
-
-      // Monitor shell (rounded box effect)
-      const shellGeom = new THREE.BoxGeometry(5, 4, 0.6);
-      const shellMat = new THREE.MeshPhongMaterial({
-        color: 0x2a2a2a,
-        shininess: 30
-      });
-      const shell = new THREE.Mesh(shellGeom, shellMat);
-      monitor.add(shell);
-
-      // Screen bezel (inner frame)
-      const bezelGeom = new THREE.BoxGeometry(4.6, 3.6, 0.1);
-      const bezelMat = new THREE.MeshPhongMaterial({
-        color: 0x1a1a1a,
-        shininess: 50
-      });
-      const bezel = new THREE.Mesh(bezelGeom, bezelMat);
-      bezel.position.z = 0.25;
-      monitor.add(bezel);
-
-      // Curved screen (using sphere segment)
-      const screenGeom = new THREE.SphereGeometry(3, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-      const screenMat = new THREE.MeshBasicMaterial({
-        color: 0x000011,
-        side: THREE.FrontSide
-      });
-      const screen = new THREE.Mesh(screenGeom, screenMat);
-      screen.position.z = 0.3;
-      screen.rotation.x = Math.PI;
-      monitor.add(screen);
-
-      // Screen glow
-      const glowGeom = new THREE.PlaneGeometry(4, 3);
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0x0044aa,
-        transparent: true,
-        opacity: 0.2
-      });
-      const glow = new THREE.Mesh(glowGeom, glowMat);
-      glow.position.z = 0.35;
-      monitor.add(glow);
-
-      // Stand
-      const standGeom = new THREE.BoxGeometry(1.5, 0.2, 1.2);
-      const standMat = new THREE.MeshPhongMaterial({
-        color: 0x333333,
-        shininess: 40
-      });
-      const stand = new THREE.Mesh(standGeom, standMat);
-      stand.position.y = -2.3;
-      stand.position.z = -0.1;
-      monitor.add(stand);
-
-      // Stand neck
-      const neckGeom = new THREE.BoxGeometry(0.5, 0.8, 0.3);
-      const neck = new THREE.Mesh(neckGeom, standMat);
-      neck.position.y = -1.9;
-      neck.position.z = 0.1;
-      monitor.add(neck);
-
-      // Brand label
-      const labelGeom = new THREE.PlaneGeometry(1, 0.2);
-      const labelMat = new THREE.MeshBasicMaterial({ color: 0x444444 });
-      const label = new THREE.Mesh(labelGeom, labelMat);
-      label.position.z = 0.32;
-      label.position.y = -2.1;
-      monitor.add(label);
-
-      return monitor;
-    }
-
-    // Create keyboard
-    function createKeyboard() {
-      const keyboard = new THREE.Group();
-
-      const keyMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
-
-      // Base
-      const baseGeom = new THREE.BoxGeometry(4, 0.15, 1.5);
-      const base = new THREE.Mesh(baseGeom, keyMat);
-      keyboard.add(base);
-
-      // Keys (simplified grid)
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 13; col++) {
-          const keyGeom = new THREE.BoxGeometry(0.25, 0.08, 0.25);
-          const key = new THREE.Mesh(keyGeom, keyMat);
-          key.position.set(-3 + col * 0.3, 0.12, -0.5 + row * 0.3);
-          keyboard.add(key);
-        }
-      }
-
-      keyboard.position.y = -3;
-      keyboard.position.z = 1;
-      keyboard.rotation.x = -0.2;
-
-      return keyboard;
-    }
-
-    // Create vaporwave grid
-    function createVaporwaveGrid() {
-      const gridGroup = new THREE.Group();
-
-      const gridMat = new THREE.LineBasicMaterial({
-        color: 0xff00ff,
-        transparent: true,
-        opacity: 0.3
-      });
-
-      // Horizontal lines
-      for (let i = -15; i <= 0; i++) {
-        const points = [
-          new THREE.Vector3(-20, i, -15),
-          new THREE.Vector3(20, i, -15)
-        ];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        gridGroup.add(new THREE.Line(geometry, gridMat));
-      }
-
-      // Vertical lines with perspective
-      for (let i = -20; i <= 20; i += 2) {
-        const points = [
-          new THREE.Vector3(i, -15, -15),
-          new THREE.Vector3(i * 0.5, 0, -5)
-        ];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        gridGroup.add(new THREE.Line(geometry, gridMat));
-      }
-
-      return gridGroup;
-    }
-
-    // ============================================
-    // Build Scene
-    // ============================================
-    const monitor = createCRTMonitor();
-    monitor.position.set(0, 0.5, 0);
-    scene.add(monitor);
-
-    const keyboard = createKeyboard();
-    scene.add(keyboard);
-
-    const grid = createVaporwaveGrid();
-    scene.add(grid);
-
-    // ============================================
-    // Desktop HTML (CSS2DRenderer)
-    // ============================================
-    const desktopHTML = `
-      <div class="desktop-3d" id="desktop-3d">
-        <div class="desktop" id="desktop">
-          <div class="desktop-icon" data-folder="about" ondblclick="openFolder('about')">
-            <div class="icon"><div class="folder-tab"></div><div class="folder-body"></div></div>
-            <div class="label">About Me</div>
-          </div>
-          <div class="desktop-icon" data-folder="posts" ondblclick="openFolder('posts')">
-            <div class="icon"><div class="folder-tab"></div><div class="folder-body"></div></div>
-            <div class="label">Posts</div>
-          </div>
-          <div class="desktop-icon" data-folder="category" ondblclick="openFolder('category')">
-            <div class="icon"><div class="folder-tab"></div><div class="folder-body"></div></div>
-            <div class="label">Category</div>
-          </div>
-        </div>
-        <div class="taskbar">
-          <button class="start-button" onclick="showStartMenu()">开始</button>
-          <div class="taskbar-windows" id="taskbar-windows"></div>
-          <div class="system-tray">
-            <span id="clock"></span>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const desktopDiv = document.createElement('div');
-    desktopDiv.innerHTML = desktopHTML;
-    const desktopElement = desktopDiv.firstElementChild;
-
-    // Initially hidden until camera enters screen
-    desktopElement.style.opacity = '0';
-    desktopElement.style.transition = 'opacity 1s';
-
-    const desktopLabel = new CSS2DObject(desktopElement);
-    desktopLabel.position.set(0, 0.3, 0.5);
-    scene.add(desktopLabel);
-
-    // ============================================
-    // Camera Animation
-    // ============================================
-    const animation = {
-      phase: 'approach', // 'approach', 'enter', 'done'
-      startTime: Date.now(),
-      duration: {
-        approach: 2500,    // 2.5s to get to front of screen
-        enter: 1500        // 1.5s to enter screen
-      }
-    };
-
-    // Camera positions
-    const positions = {
-      start: new THREE.Vector3(-8, 2, 8),
-      front: new THREE.Vector3(0, 0.5, 4),
-      inside: new THREE.Vector3(0, 0.5, 1.5)
-    };
-
-    camera.position.copy(positions.start);
-    camera.lookAt(0, 0.5, 0);
-
-    function easeInOutCubic(t) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      const elapsed = Date.now() - animation.startTime;
-      const totalDuration = animation.duration.approach + animation.duration.enter;
-
-      if (elapsed < animation.duration.approach) {
-        // Phase 1: Approach
-        const progress = easeInOutCubic(elapsed / animation.duration.approach);
-        camera.position.lerpVectors(positions.start, positions.front, progress);
-        camera.lookAt(0, 0.5, 0);
-      } else if (elapsed < totalDuration) {
-        // Phase 2: Enter screen
-        const enterElapsed = elapsed - animation.duration.approach;
-        const progress = easeInOutCubic(enterElapsed / animation.duration.enter);
-        camera.position.lerpVectors(positions.front, positions.inside, progress);
-
-        // Fade in desktop
-        if (progress > 0.5 && desktopElement.style.opacity === '0') {
-          desktopElement.style.opacity = '1';
-        }
-
-        // Move monitor slightly back as we enter
-        monitor.position.z = -progress * 0.5;
-      }
-
-      renderer.render(scene, camera);
-      labelRenderer.render(scene, camera);
-    }
-
-    // Start animation
+  <script>
     setTimeout(() => {
-      document.getElementById('loading').classList.add('hidden');
-      animate();
-    }, 500);
-
-    // ============================================
-    // Window Resize Handler
-    // ============================================
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // ============================================
-    // Desktop Interactions (reuse existing JS)
-    // ============================================
-    // These will be initialized after CSS2DObject is added to scene
-    window.desktopLabel = desktopLabel;
-    window.scene = scene;
+      document.getElementById('boot-screen').classList.add('hidden');
+      setTimeout(() => {
+        window.location.href = '/desktop/';
+      }, 400);
+    }, 3800);
   </script>
-
-  <!-- Load desktop interaction scripts -->
-  <script src="/js/markdown-renderer.js"></script>
-  <script src="/js/window-manager.js"></script>
-  <script src="/js/file-browser.js"></script>
-  <script src="/js/desktop-3d.js"></script>
 </body>
 </html>

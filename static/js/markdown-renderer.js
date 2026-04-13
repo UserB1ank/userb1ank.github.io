@@ -1,5 +1,97 @@
 // static/js/markdown-renderer.js
 
+// 提取 Markdown 中的标题生成目录
+window.extractToc = function(content) {
+  const headings = [];
+  const lines = content.split('\n');
+
+  lines.forEach((line, index) => {
+    const match = line.match(/^(#{1,6})\s+(.+)$/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      const id = text.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      headings.push({ level, text, id, line: index });
+    }
+  });
+
+  return headings;
+}
+
+// 渲染目录
+window.renderToc = function(headings, windowId) {
+  if (!headings || headings.length === 0) {
+    return '';
+  }
+
+  let html = '';
+  html += `<div class="article-toc" id="article-toc-${windowId}">`;
+  html += `<div class="article-toc-header">`;
+  html += `<span class="article-toc-title">目录</span>`;
+  html += `<button class="article-toc-toggle" onclick="window.toggleToc('${windowId}')" title="隐藏目录">`;
+  html += `<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>`;
+  html += `</button>`;
+  html += `</div>`;
+  html += `<div class="article-toc-content" id="toc-content-${windowId}">`;
+  html += `<ul class="toc-list">`;
+
+  headings.forEach((heading, i) => {
+    const nextHeading = headings[i + 1];
+    const nextLevel = nextHeading ? nextHeading.level : heading.level;
+
+    html += `<li class="toc-item toc-level-${heading.level}">`;
+    html += `<a href="#${heading.id}" class="toc-link" data-id="${heading.id}" onclick="window.scrollToHeading('${heading.id}'); return false;">${heading.text}</a>`;
+
+    if (nextLevel > heading.level) {
+      html += `<ul class="toc-list">`;
+    } else if (nextLevel < heading.level) {
+      const diff = heading.level - nextLevel;
+      for (let d = 0; d < diff; d++) {
+        html += `</ul></li>`;
+      }
+    } else {
+      html += `</li>`;
+    }
+  });
+
+  html += '</ul></div></div>';
+  return html;
+}
+
+window.toggleToc = function(windowId) {
+  const toc = document.getElementById(`article-toc-${windowId}`);
+  if (toc) {
+    toc.classList.toggle('collapsed');
+  }
+}
+
+window.scrollToHeading = function(headingId) {
+  const element = document.getElementById(headingId);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+window.showBackToTop = function(windowId, show) {
+  let btn = document.getElementById(`back-to-top-${windowId}`);
+  if (!btn && show) {
+    btn = document.createElement('button');
+    btn.id = `back-to-top-${windowId}`;
+    btn.className = 'back-to-top';
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>`;
+    btn.onclick = () => {
+      const content = document.querySelector(`#content-${windowId} .article-content`);
+      if (content) {
+        content.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    document.body.appendChild(btn);
+  }
+  if (btn) {
+    btn.classList.toggle('visible', show);
+  }
+}
+
 // 简单的 Markdown 渲染器 (不使用外部库)
 // 挂载到全局
 window.renderMarkdown = async function(content) {
@@ -18,13 +110,15 @@ window.renderMarkdown = async function(content) {
   // 行内代码
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-  // 标题
-  html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
-  html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
-  html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+  // 标题 (带锚点ID)
+  const headingTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  headingTags.forEach((tag, i) => {
+    const level = i + 1;
+    html = html.replace(new RegExp(`^#{${level}}\\s+(.+)$`, 'gm'), (match, text) => {
+      const id = text.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `<${tag} id="${id}">${text}</${tag}>`;
+    });
+  });
 
   // 粗体和斜体
   html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');

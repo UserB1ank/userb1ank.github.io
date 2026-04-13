@@ -24,6 +24,21 @@ body {
   background: #008080;
 }
 
+/* Windows Container - positioned above 3D scene */
+#windows-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 500;
+  pointer-events: none;
+}
+
+#windows-container .window {
+  pointer-events: auto;
+}
+
 /* Window */
 .window {
   position: absolute;
@@ -138,6 +153,76 @@ body {
   overflow: auto;
   height: calc(100% - 52px);
   background: white;
+}
+
+/* Window Resize Handles */
+.window-resize-handle {
+  position: absolute;
+  background: transparent;
+}
+
+.resize-n {
+  top: -3px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  cursor: n-resize;
+}
+
+.resize-s {
+  bottom: -3px;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  cursor: s-resize;
+}
+
+.resize-e {
+  right: -3px;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  cursor: e-resize;
+}
+
+.resize-w {
+  left: -3px;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  cursor: w-resize;
+}
+
+.resize-ne {
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: ne-resize;
+}
+
+.resize-nw {
+  top: -3px;
+  left: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: nw-resize;
+}
+
+.resize-se {
+  bottom: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: se-resize;
+}
+
+.resize-sw {
+  bottom: -3px;
+  left: -3px;
+  width: 12px;
+  height: 12px;
+  cursor: sw-resize;
 }
 
 /* Desktop Icons */

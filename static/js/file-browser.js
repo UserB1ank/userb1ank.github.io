@@ -28,8 +28,19 @@ class FileBrowser {
 
       if (isPostPath) {
         // 阅读文章
-        data = await this.loadPost(path);
-        if (content) content.innerHTML = `<div class="markdown-body">${data}</div>`;
+        const result = await this.loadPostWithToc(path);
+        if (content) {
+          content.innerHTML = `<div class="article-with-toc">${result.toc}<div class="article-content">${result.content}<button class="back-to-top" id="back-to-top-${this.windowId}" onclick="window.showBackToTop('${this.windowId}', false); document.querySelector('.article-content').scrollTo({top: 0, behavior: 'smooth'});"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button></div></div>`;
+          // 监听滚动显示/隐藏回到顶部按钮
+          setTimeout(() => {
+            const articleContent = content.querySelector('.article-content');
+            if (articleContent) {
+              articleContent.addEventListener('scroll', () => {
+                window.showBackToTop(this.windowId, articleContent.scrollTop > 300);
+              });
+            }
+          }, 100);
+        }
       } else if (isCategoryPath) {
         // 分类下的文章列表
         const category = decodeURIComponent(path.replace('/category/', '').replace('/', ''));
@@ -96,6 +107,46 @@ class FileBrowser {
     } catch (e) {
       throw new Error('文章不存在');
     }
+  }
+
+  async loadPostWithToc(path) {
+    const slug = path.replace('/posts/', '').replace(/\/$/, '');
+    const cacheKey = `post:${slug}`;
+
+    // 从 JSON 端点获取原始 markdown 和渲染后的内容
+    let rawContent = '';
+    let content = '';
+
+    try {
+      const response = await fetch(`/posts/${slug}/index.json`);
+      if (response.ok) {
+        const data = await response.json();
+        rawContent = data.rawContent || '';
+        content = data.content || '';
+      }
+    } catch (e) {
+      console.error('Failed to load post data:', e);
+    }
+
+    // 如果 JSON 没有 rawContent，回退到渲染后的内容
+    if (!rawContent) {
+      content = await this.loadPost(path);
+      return {
+        toc: '',
+        content: `<div class="markdown-body">${content}</div>`
+      };
+    }
+
+    // 提取目录
+    const headings = extractToc(rawContent);
+    const tocHtml = headings.length > 0 ? renderToc(headings, this.windowId) : '';
+
+    const contentHtml = `<div class="markdown-body">${content}</div>`;
+
+    return {
+      toc: tocHtml,
+      content: contentHtml
+    };
   }
 
   async loadPostList() {

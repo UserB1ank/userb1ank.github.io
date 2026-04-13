@@ -1,1 +1,15 @@
-{{- dict "title" .Title "date" (.Date.Format "2006-01-02") "content" .Content "category" .Params.category | jsonify -}}
+{{- $raw := .RawContent -}}
+{{- $lines := split $raw "\n" -}}
+{{- $content_start := 0 -}}
+{{- range $i, $line := $lines -}}
+  {{- if and (gt $i 0) (eq $line "---") -}}
+    {{- $content_start = $i | add 1 -}}
+    {{- break -}}
+  {{- end -}}
+{{- end -}}
+{{- $markdown := "" -}}
+{{- range after $content_start $lines -}}
+  {{- $markdown = print $markdown . "\n" -}}
+{{- end -}}
+{{- $markdown = trim $markdown "\n" -}}
+{{- dict "title" .Title "date" (.Date.Format "2006-01-02") "content" .Content "category" .Params.category "rawContent" $markdown | jsonify -}}
