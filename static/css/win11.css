@@ -750,6 +750,7 @@ html, body {
   display: flex;
   height: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .article-toc {
@@ -766,6 +767,35 @@ html, body {
 .article-toc.collapsed {
   width: 0;
   margin-left: -1px;
+  flex-shrink: 1;
+}
+
+.article-with-toc .toc-expand-btn {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: var(--win11-surface);
+  border: 1px solid var(--win11-border);
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+}
+
+.article-with-toc .toc-expand-btn svg {
+  width: 14px;
+  height: 14px;
+  color: var(--win11-text-secondary);
+}
+
+.article-with-toc.toc-collapsed .toc-expand-btn {
+  display: flex;
 }
 
 .article-toc-header {

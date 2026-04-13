@@ -25,9 +25,13 @@ class WindowManager {
     win.style.top = `${Math.max(60, (window.innerHeight - height) / 2 - offsetY / 2)}px`;
     win.style.zIndex = ++this.zIndex;
 
+    // 计算同一类型的窗口数量，用于显示编号
+    const sameTypeCount = [...this.windows.keys()].filter(k => k.startsWith(id.split('-')[0] + '-')).length + 1;
+    const displayTitle = sameTypeCount > 1 ? `${title} (${sameTypeCount})` : title;
+
     win.innerHTML = `
       <div class="window-titlebar" onmousedown="windowManager.bringToFront('${id}')">
-        <span class="title">${title}</span>
+        <span class="title">${displayTitle}</span>
         <div class="window-controls">
           <button class="window-control minimize" onclick="windowManager.minimizeWindow('${id}')" title="最小化">
             <svg viewBox="0 0 10 10"><line x1="0" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1"/></svg>

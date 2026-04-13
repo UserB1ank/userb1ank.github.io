@@ -1,5 +1,8 @@
 // static/js/desktop.js
 
+// 每个窗口类型的计数器，用于生成唯一 ID
+const windowCounters = { about: 0, posts: 0, category: 0 };
+
 function openFolder(type) {
   const routes = {
     about: { title: 'About Me', path: '/about/' },
@@ -10,18 +13,22 @@ function openFolder(type) {
   const config = routes[type];
   if (!config) return;
 
-  // 检查窗口是否已存在
-  if (windowManager.windows.has(type)) {
-    windowManager.bringToFront(type);
-    return;
-  }
+  // 生成唯一窗口 ID，允许同一类型多个窗口
+  windowCounters[type]++;
+  const windowId = `${type}-${windowCounters[type]}`;
 
   // 创建窗口
-  windowManager.createWindow(type, config.title, '<div class="loading">加载中...</div>');
+  windowManager.createWindow(windowId, config.title, '<div class="loading">加载中...</div>');
 
-  // 导航到初始路径
-  const fb = windowManager.fileBrowsers.get(type);
+  // 导航到初始路径并更新历史
+  const fb = windowManager.fileBrowsers.get(windowId);
   if (fb) {
+    const winData = windowManager.windows.get(windowId);
+    if (winData) {
+      winData.history = [config.path];
+      winData.historyIndex = 0;
+      windowManager.updateNavButtons(windowId);
+    }
     fb.navigate(config.path);
   }
 }

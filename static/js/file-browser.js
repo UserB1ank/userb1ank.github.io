@@ -30,7 +30,7 @@ class FileBrowser {
         // 阅读文章
         const result = await this.loadPostWithToc(path);
         if (content) {
-          content.innerHTML = `<div class="article-with-toc">${result.toc}<div class="article-content">${result.content}<button class="back-to-top" id="back-to-top-${this.windowId}" onclick="window.showBackToTop('${this.windowId}', false); document.querySelector('.article-content').scrollTo({top: 0, behavior: 'smooth'});"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button></div></div>`;
+          content.innerHTML = `<div class="article-with-toc" id="article-with-toc-${this.windowId}"><button class="toc-expand-btn" onclick="window.toggleToc('${this.windowId}')" title="显示目录"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>${result.toc}<div class="article-content">${result.content}<button class="back-to-top" id="back-to-top-${this.windowId}" onclick="window.showBackToTop('${this.windowId}', false); document.querySelector('.article-content').scrollTo({top: 0, behavior: 'smooth'});"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button></div></div>`;
           // 监听滚动显示/隐藏回到顶部按钮
           setTimeout(() => {
             const articleContent = content.querySelector('.article-content');
@@ -271,7 +271,16 @@ class FileBrowser {
         item.addEventListener('dblclick', () => {
           const path = item.dataset.path;
           if (path) {
-            // 直接使用 FileBrowser 的 navigate，它会正确更新地址栏和历史
+            // 更新窗口管理器的历史记录
+            const winData = window.windowManager.windows.get(this.windowId);
+            if (winData) {
+              if (winData.history[winData.historyIndex] !== path) {
+                winData.history = winData.history.slice(0, winData.historyIndex + 1);
+                winData.history.push(path);
+                winData.historyIndex = winData.history.length - 1;
+                window.windowManager.updateNavButtons(this.windowId);
+              }
+            }
             this.navigate(path);
           }
         });
@@ -294,9 +303,15 @@ class FileBrowser {
           const category = item.dataset.category;
           if (category) {
             const path = `/category/${encodeURIComponent(category)}/`;
-            const addressBar = document.getElementById(`address-${this.windowId}`);
-            if (addressBar) {
-              addressBar.value = path;
+            // 更新窗口管理器的历史记录
+            const winData = window.windowManager.windows.get(this.windowId);
+            if (winData) {
+              if (winData.history[winData.historyIndex] !== path) {
+                winData.history = winData.history.slice(0, winData.historyIndex + 1);
+                winData.history.push(path);
+                winData.historyIndex = winData.history.length - 1;
+                window.windowManager.updateNavButtons(this.windowId);
+              }
             }
             this.navigate(path);
           }

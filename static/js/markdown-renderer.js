@@ -60,8 +60,17 @@ window.renderToc = function(headings, windowId) {
 
 window.toggleToc = function(windowId) {
   const toc = document.getElementById(`article-toc-${windowId}`);
+  const wrapper = document.getElementById(`article-with-toc-${windowId}`);
   if (toc) {
     toc.classList.toggle('collapsed');
+    const isCollapsed = toc.classList.contains('collapsed');
+    if (wrapper) {
+      wrapper.classList.toggle('toc-collapsed', isCollapsed);
+    }
+    const btn = toc.querySelector('.article-toc-toggle');
+    if (btn) {
+      btn.title = isCollapsed ? '显示目录' : '隐藏目录';
+    }
   }
 }
 
