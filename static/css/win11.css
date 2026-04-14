@@ -157,6 +157,12 @@ html, body {
   height: 20px;
 }
 
+.taskbar-windows {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
 .taskbar-window-btn {
   height: 40px;
   padding: 0 12px;
@@ -768,6 +774,14 @@ html, body {
   width: 0;
   margin-left: -1px;
   flex-shrink: 1;
+}
+
+.article-toc.collapsed .article-toc-header {
+  display: none;
+}
+
+.article-toc-content.collapsed {
+  display: none;
 }
 
 .article-with-toc .toc-expand-btn {

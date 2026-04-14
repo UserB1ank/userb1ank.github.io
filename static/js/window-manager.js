@@ -18,11 +18,14 @@ class WindowManager {
     win.id = `window-${id}`;
     win.style.width = `${width}px`;
     win.style.height = `${height}px`;
-    // Center window on screen with offset for natural feel
-    const offsetX = this.windows.size * 30;
-    const offsetY = this.windows.size * 30 + 60;
-    win.style.left = `${Math.max(50, (window.innerWidth - width) / 2 + offsetX - 100)}px`;
-    win.style.top = `${Math.max(60, (window.innerHeight - height) / 2 - offsetY / 2)}px`;
+    // Arrange windows from left to right, wrapping to next row every 8 windows
+    const baseOffsetX = 80;
+    const baseOffsetY = 60;
+    const count = this.windows.size;
+    const offsetX = (count % 8) * (width / 2);
+    const offsetY = Math.floor(count / 8) * 60;
+    win.style.left = `${baseOffsetX + offsetX}px`;
+    win.style.top = `${baseOffsetY + offsetY}px`;
     win.style.zIndex = ++this.zIndex;
 
     // 计算同一类型的窗口数量，用于显示编号
@@ -295,25 +298,28 @@ class WindowManager {
     });
   }
 
-  async navigate(id) {
+  async navigate(id, path = null) {
     const addressBar = document.getElementById(`address-${id}`);
-    const path = addressBar.value;
+    const targetPath = path || addressBar.value;
 
     const fb = this.fileBrowsers.get(id);
     if (fb) {
       const winData = this.windows.get(id);
-      if (winData.history[winData.historyIndex] !== path) {
+      if (winData.history[winData.historyIndex] !== targetPath) {
         winData.history = winData.history.slice(0, winData.historyIndex + 1);
-        winData.history.push(path);
+        winData.history.push(targetPath);
         winData.historyIndex = winData.history.length - 1;
       }
 
-      await fb.navigate(path);
+      await fb.navigate(targetPath);
+      if (addressBar) {
+        addressBar.value = targetPath;
+      }
       this.updateNavButtons(id);
     }
   }
 
-  goBack(id) {
+  async goBack(id) {
     const winData = this.windows.get(id);
     const fb = this.fileBrowsers.get(id);
 
@@ -321,12 +327,12 @@ class WindowManager {
       winData.historyIndex--;
       const path = winData.history[winData.historyIndex];
       document.getElementById(`address-${id}`).value = path;
-      fb.navigate(path);
+      await fb.navigate(path);
       this.updateNavButtons(id);
     }
   }
 
-  goForward(id) {
+  async goForward(id) {
     const winData = this.windows.get(id);
     const fb = this.fileBrowsers.get(id);
 
@@ -334,7 +340,7 @@ class WindowManager {
       winData.historyIndex++;
       const path = winData.history[winData.historyIndex];
       document.getElementById(`address-${id}`).value = path;
-      fb.navigate(path);
+      await fb.navigate(path);
       this.updateNavButtons(id);
     }
   }

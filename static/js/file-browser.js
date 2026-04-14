@@ -271,17 +271,7 @@ class FileBrowser {
         item.addEventListener('dblclick', () => {
           const path = item.dataset.path;
           if (path) {
-            // 更新窗口管理器的历史记录
-            const winData = window.windowManager.windows.get(this.windowId);
-            if (winData) {
-              if (winData.history[winData.historyIndex] !== path) {
-                winData.history = winData.history.slice(0, winData.historyIndex + 1);
-                winData.history.push(path);
-                winData.historyIndex = winData.history.length - 1;
-                window.windowManager.updateNavButtons(this.windowId);
-              }
-            }
-            this.navigate(path);
+            window.windowManager.navigate(this.windowId, path);
           }
         });
 
@@ -303,17 +293,7 @@ class FileBrowser {
           const category = item.dataset.category;
           if (category) {
             const path = `/category/${encodeURIComponent(category)}/`;
-            // 更新窗口管理器的历史记录
-            const winData = window.windowManager.windows.get(this.windowId);
-            if (winData) {
-              if (winData.history[winData.historyIndex] !== path) {
-                winData.history = winData.history.slice(0, winData.historyIndex + 1);
-                winData.history.push(path);
-                winData.historyIndex = winData.history.length - 1;
-                window.windowManager.updateNavButtons(this.windowId);
-              }
-            }
-            this.navigate(path);
+            window.windowManager.navigate(this.windowId, path);
           }
         });
 

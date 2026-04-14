@@ -26,9 +26,9 @@ window.renderToc = function(headings, windowId) {
 
   let html = '';
   html += `<div class="article-toc" id="article-toc-${windowId}">`;
-  html += `<div class="article-toc-header">`;
+  html += `<div class="article-toc-header" onclick="window.toggleToc('${windowId}')" style="cursor:pointer;">`;
   html += `<span class="article-toc-title">目录</span>`;
-  html += `<button class="article-toc-toggle" onclick="window.toggleToc('${windowId}')" title="隐藏目录">`;
+  html += `<button class="article-toc-toggle" onclick="event.stopPropagation(); window.toggleToc('${windowId}')" title="隐藏目录">`;
   html += `<svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>`;
   html += `</button>`;
   html += `</div>`;
@@ -60,10 +60,12 @@ window.renderToc = function(headings, windowId) {
 
 window.toggleToc = function(windowId) {
   const toc = document.getElementById(`article-toc-${windowId}`);
+  const tocContent = document.getElementById(`toc-content-${windowId}`);
   const wrapper = document.getElementById(`article-with-toc-${windowId}`);
-  if (toc) {
+  if (toc && tocContent) {
+    tocContent.classList.toggle('collapsed');
     toc.classList.toggle('collapsed');
-    const isCollapsed = toc.classList.contains('collapsed');
+    const isCollapsed = tocContent.classList.contains('collapsed');
     if (wrapper) {
       wrapper.classList.toggle('toc-collapsed', isCollapsed);
     }
