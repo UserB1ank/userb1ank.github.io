@@ -1,6 +1,6 @@
 baseURL = 'https://example.com/'
 languageCode = 'zh-cn'
-title = 'PC Station Blog'
+title = 'userb1ank'
 theme = 'hugo-xp'
 publishDir = 'public'
 
