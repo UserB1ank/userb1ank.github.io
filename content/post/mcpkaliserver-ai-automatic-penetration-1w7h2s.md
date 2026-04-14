@@ -3,7 +3,7 @@ title: MCP-Kali-Server AI自动渗透
 slug: mcpkaliserver-ai-automatic-penetration-1w7h2s
 url: /post/mcpkaliserver-ai-automatic-penetration-1w7h2s.html
 date: '2026-03-11 10:55:15+08:00'
-lastmod: '2026-04-14 23:26:42+08:00'
+lastmod: '2026-04-14 23:27:49+08:00'
 toc: true
 isCJKLanguage: true
 ---
