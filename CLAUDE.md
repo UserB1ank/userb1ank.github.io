@@ -10,7 +10,7 @@ Windows XP Luna 主题风格的复古博客网站，包含 3D 开场动画和交
 
 ## 技术栈
 
-- **静态站点生成器**: Hugo (Page Bundle 内容组织)
+- **静态站点生成器**: Hugo
 - **前端**: 纯 HTML/CSS/JavaScript + Three.js (3D 动画)
 - **部署**: GitHub Actions → GitHub Pages
 
@@ -18,10 +18,9 @@ Windows XP Luna 主题风格的复古博客网站，包含 3D 开场动画和交
 
 ```
 /                          # Hugo 根目录
-├── content/              # 内容 (Page Bundle)
+├── content/              # 内容
 │   ├── posts/            # 博客文章
-│   │   └── [slug]/
-│   │       └── index.md
+│   │   └── <slug>.md
 │   └── about/
 │       └── index.md
 ├── layouts/              # Hugo 模板
@@ -73,7 +72,7 @@ act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:runner
 
 ## 内容管理
 
-Hugo Page Bundle 结构，每篇文章一个文件夹：
+每篇文章是 `content/posts/` 下的单个 Markdown 文件：
 
 ```yaml
 ---
