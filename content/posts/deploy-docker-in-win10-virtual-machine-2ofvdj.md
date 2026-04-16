@@ -1,7 +1,6 @@
 ---
 title: 在win10虚拟机中部署docker
 slug: deploy-docker-in-win10-virtual-machine-2ofvdj
-url: /post/deploy-docker-in-win10-virtual-machine-2ofvdj.html
 date: '2025-04-19 00:00:00+08:00'
 lastmod: '2026-04-14 23:39:06+08:00'
 toc: true

@@ -22,9 +22,9 @@ class FileBrowser {
 
     try {
       let data;
-      // 文章路径: /posts/slug/ (但不是 /posts/ 本身)
-      const isPostPath = path.startsWith('/posts/') && path !== '/posts/' && path !== '/posts' && path.endsWith('/');
-      const isCategoryPath = path.startsWith('/category/') && path !== '/category/' && path !== '/category' && path.endsWith('/');
+      // 文章路径: /post/slug.html 或 /posts/slug.html 或 /posts/slug/
+      const isPostPath = (path.startsWith('/post/') || path.startsWith('/posts/')) && !['/', '/posts/', '/posts', '/post/', '/post'].includes(path) && (path.endsWith('.html') || path.endsWith('/'));
+      const isCategoryPath = path.startsWith('/category/') && path !== '/category/' && path !== '/category' && (path.endsWith('.html') || path.endsWith('/'));
 
       if (isPostPath) {
         // 阅读文章
@@ -43,7 +43,7 @@ class FileBrowser {
         }
       } else if (isCategoryPath) {
         // 分类下的文章列表
-        const category = decodeURIComponent(path.replace('/category/', '').replace('/', ''));
+        const category = decodeURIComponent(path.replace('/category/', '').replace(/\.html$/, '').replace(/\/$/, ''));
         data = await this.loadCategory(category);
         if (content) content.innerHTML = `<div class="file-list">${data}</div>`;
         this.bindFileItemEvents();
@@ -76,7 +76,8 @@ class FileBrowser {
   }
 
   async loadPost(path) {
-    const slug = path.replace('/posts/', '').replace(/\/$/, '');
+    const prefix = path.startsWith('/post/') ? '/post' : '/posts';
+    const slug = path.replace(/^\/(posts|post)\//, '').replace(/\.html$/, '').replace(/\/$/, '');
     const cacheKey = `post:${slug}`;
 
     if (this.cache.has(cacheKey)) {
@@ -84,7 +85,7 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch(`/posts/${slug}.json`);
+      const response = await fetch(`${prefix}/${slug}.json`);
       if (response.ok) {
         const data = await response.json();
         // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
@@ -110,7 +111,8 @@ class FileBrowser {
   }
 
   async loadPostWithToc(path) {
-    const slug = path.replace('/posts/', '').replace(/\/$/, '');
+    const prefix = path.startsWith('/post/') ? '/post' : '/posts';
+    const slug = path.replace(/^\/(posts|post)\//, '').replace(/\.html$/, '').replace(/\/$/, '');
     const cacheKey = `post:${slug}`;
 
     // 从 JSON 端点获取原始 markdown 和渲染后的内容
@@ -118,7 +120,7 @@ class FileBrowser {
     let content = '';
 
     try {
-      const response = await fetch(`/posts/${slug}.json`);
+      const response = await fetch(`${prefix}/${slug}.json`);
       if (response.ok) {
         const data = await response.json();
         rawContent = data.rawContent || '';
@@ -292,7 +294,7 @@ class FileBrowser {
         item.addEventListener('dblclick', () => {
           const category = item.dataset.category;
           if (category) {
-            const path = `/category/${encodeURIComponent(category)}/`;
+            const path = `/category/${encodeURIComponent(category)}.html`;
             window.windowManager.navigate(this.windowId, path);
           }
         });

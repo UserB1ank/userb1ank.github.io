@@ -1,7 +1,6 @@
 ---
 title: Instant-wp
 slug: instantwp-z1t5kuz
-url: /post/instantwp-z1t5kuz.html
 date: '2024-10-16 00:00:00+08:00'
 lastmod: '2026-04-14 23:48:32+08:00'
 toc: true
