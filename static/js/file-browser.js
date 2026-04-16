@@ -84,7 +84,7 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch(`/posts/${slug}/index.json`);
+      const response = await fetch(`/posts/${slug}.json`);
       if (response.ok) {
         const data = await response.json();
         // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
@@ -98,7 +98,7 @@ class FileBrowser {
 
     // 回退到直接获取 markdown
     try {
-      const response = await fetch(`/posts/${slug}/index.md`);
+      const response = await fetch(`/posts/${slug}.md`);
       if (!response.ok) throw new Error('文章不存在');
       const content = await response.text();
       const html = await renderMarkdown(content);
@@ -118,7 +118,7 @@ class FileBrowser {
     let content = '';
 
     try {
-      const response = await fetch(`/posts/${slug}/index.json`);
+      const response = await fetch(`/posts/${slug}.json`);
       if (response.ok) {
         const data = await response.json();
         rawContent = data.rawContent || '';
@@ -238,7 +238,7 @@ class FileBrowser {
     }
 
     try {
-      const response = await fetch('/about/index.json');
+      const response = await fetch('/about.json');
       if (response.ok) {
         const data = await response.json();
         // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
@@ -251,7 +251,7 @@ class FileBrowser {
 
     // 回退到 markdown
     try {
-      const response = await fetch('/about/index.md');
+      const response = await fetch('/about.md');
       if (!response.ok) throw new Error('关于页面不存在');
       const content = await response.text();
       const html = await renderMarkdown(content);
