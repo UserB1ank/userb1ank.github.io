@@ -3,7 +3,7 @@ languageCode = 'zh-cn'
 title = 'userb1ank'
 theme = 'hugo-xp'
 publishDir = 'public'
-uglyURLs = false
+uglyURLs = true
 
 [markup]
   [markup.highlight]
