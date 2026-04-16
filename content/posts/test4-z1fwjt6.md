@@ -1,10 +1,9 @@
 ---
 title: test4
 slug: test4-z1fwjt6
+url: /post/test4-z1fwjt6.html
 date: '2026-04-16 22:41:35+08:00'
-lastmod: '2026-04-16 22:41:53+08:00'
-categories:
-  - 测试
+lastmod: '2026-04-16 22:54:41+08:00'
 toc: true
 isCJKLanguage: true
 ---
