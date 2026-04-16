@@ -18,14 +18,12 @@ class WindowManager {
     win.id = `window-${id}`;
     win.style.width = `${width}px`;
     win.style.height = `${height}px`;
-    // Arrange windows from left to right, wrapping to next row every 8 windows
-    const baseOffsetX = 80;
-    const baseOffsetY = 60;
     const count = this.windows.size;
-    const offsetX = (count % 8) * (width / 2);
-    const offsetY = Math.floor(count / 8) * 60;
-    win.style.left = `${baseOffsetX + offsetX}px`;
-    win.style.top = `${baseOffsetY + offsetY}px`;
+    const cascade = count * 28;
+    const left = Math.max(0, (window.innerWidth - width) / 2 + cascade);
+    const top = Math.max(0, (window.innerHeight - 48 - height) / 2 + cascade);
+    win.style.left = `${left}px`;
+    win.style.top = `${top}px`;
     win.style.zIndex = ++this.zIndex;
 
     // 计算同一类型的窗口数量，用于显示编号

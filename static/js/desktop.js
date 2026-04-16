@@ -43,7 +43,34 @@ function updateClock() {
 }
 
 function showStartMenu() {
-  alert('开始菜单 - 敬请期待');
+  const btn = document.querySelector('.start-button');
+  if (document.getElementById('start-popup')) {
+    document.getElementById('start-popup').remove();
+    return;
+  }
+  const popup = document.createElement('div');
+  popup.id = 'start-popup';
+  popup.style.cssText = `
+    position:fixed; bottom:56px; left:50%; transform:translateX(-50%) scale(0.8);
+    background:rgba(20,20,30,0.95); border:1px solid rgba(255,255,255,0.15);
+    border-radius:12px; padding:20px 28px; z-index:9999; text-align:center;
+    font-family:'Segoe UI',sans-serif; color:#fff; opacity:0;
+    transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  `;
+  popup.innerHTML = `
+    <div style="font-size:36px;margin-bottom:8px;animation:spin 2s linear infinite">⚙️</div>
+    <div style="font-size:13px;color:#aaa;margin-bottom:4px">施工中...</div>
+    <div style="font-size:11px;color:#555">( ´•ω•\` ) 敬请期待</div>
+    <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
+  `;
+  document.body.appendChild(popup);
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateX(-50%) scale(1)';
+  });
+  const close = (e) => { if (!popup.contains(e.target) && e.target !== btn) { popup.remove(); document.removeEventListener('click', close); } };
+  setTimeout(() => document.addEventListener('click', close), 100);
 }
 
 // 初始化时钟
