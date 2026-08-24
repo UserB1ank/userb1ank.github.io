@@ -75,8 +75,26 @@ class FileBrowser {
     }
   }
 
+  // 依次尝试 /posts 与 /post 前缀，兼容不同时期的文章链接
+  async fetchPostJson(path) {
+    const slug = path.replace(/^\/(posts|post)\//, '').replace(/\.html$/, '').replace(/\/$/, '');
+    const first = path.startsWith('/post/') ? '/post' : '/posts';
+    const prefixes = first === '/post' ? ['/post', '/posts'] : ['/posts', '/post'];
+
+    for (const prefix of prefixes) {
+      try {
+        const response = await fetch(`${prefix}/${slug}.json`);
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (e) {
+        console.error(`Failed to load post json (${prefix}):`, e);
+      }
+    }
+    return null;
+  }
+
   async loadPost(path) {
-    const prefix = path.startsWith('/post/') ? '/post' : '/posts';
     const slug = path.replace(/^\/(posts|post)\//, '').replace(/\.html$/, '').replace(/\/$/, '');
     const cacheKey = `post:${slug}`;
 
@@ -84,17 +102,11 @@ class FileBrowser {
       return this.cache.get(cacheKey);
     }
 
-    try {
-      const response = await fetch(`${prefix}/${slug}.json`);
-      if (response.ok) {
-        const data = await response.json();
-        // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
-        const content = data.content || '';
-        this.cache.set(cacheKey, content);
-        return content || '<p>文章内容为空</p>';
-      }
-    } catch (e) {
-      console.error('Failed to load post:', e);
+    const data = await this.fetchPostJson(path);
+    if (data && data.content) {
+      // Hugo 已经把 markdown 渲染成 HTML 了，直接使用
+      this.cache.set(cacheKey, data.content);
+      return data.content;
     }
 
     // 回退到直接获取 markdown
@@ -111,27 +123,13 @@ class FileBrowser {
   }
 
   async loadPostWithToc(path) {
-    const prefix = path.startsWith('/post/') ? '/post' : '/posts';
     const slug = path.replace(/^\/(posts|post)\//, '').replace(/\.html$/, '').replace(/\/$/, '');
     const cacheKey = `post:${slug}`;
 
-    // 从 JSON 端点获取原始 markdown 和渲染后的内容
-    let rawContent = '';
-    let content = '';
+    const data = await this.fetchPostJson(path);
+    let content = (data && data.content) || '';
 
-    try {
-      const response = await fetch(`${prefix}/${slug}.json`);
-      if (response.ok) {
-        const data = await response.json();
-        rawContent = data.rawContent || '';
-        content = data.content || '';
-      }
-    } catch (e) {
-      console.error('Failed to load post data:', e);
-    }
-
-    // 如果 JSON 没有 rawContent，回退到渲染后的内容
-    if (!rawContent) {
+    if (!content) {
       content = await this.loadPost(path);
       return {
         toc: '',
@@ -139,8 +137,8 @@ class FileBrowser {
       };
     }
 
-    // 提取目录
-    const headings = extractToc(rawContent);
+    // 从渲染后的 HTML 中提取目录，保证锚点 ID 与正文标题一致
+    const headings = extractToc(content);
     const tocHtml = headings.length > 0 ? renderToc(headings, this.windowId) : '';
 
     const contentHtml = `<div class="markdown-body">${content}</div>`;

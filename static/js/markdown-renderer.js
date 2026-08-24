@@ -1,18 +1,18 @@
 // static/js/markdown-renderer.js
 
-// 提取 Markdown 中的标题生成目录
+// 提取渲染后 HTML 中的标题生成目录
+// 锚点 ID 直接取自正文标题元素，保证与 Hugo 渲染结果一致
 window.extractToc = function(content) {
   const headings = [];
-  const lines = content.split('\n');
+  const doc = new DOMParser().parseFromString(content, 'text/html');
 
-  lines.forEach((line, index) => {
-    const match = line.match(/^(#{1,6})\s+(.+)$/);
-    if (match) {
-      const level = match[1].length;
-      const text = match[2].trim();
-      const id = text.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      headings.push({ level, text, id, line: index });
-    }
+  doc.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((el, index) => {
+    headings.push({
+      level: parseInt(el.tagName[1], 10),
+      text: el.textContent.trim(),
+      id: el.id,
+      line: index
+    });
   });
 
   return headings;

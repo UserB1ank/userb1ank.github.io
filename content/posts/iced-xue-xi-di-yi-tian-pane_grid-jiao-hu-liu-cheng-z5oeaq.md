@@ -1,33 +1,29 @@
 ---
 title: Iced 学习第一天：pane_grid 交互流程
+category: "Rust"
 slug: iced-xue-xi-di-yi-tian-pane_grid-jiao-hu-liu-cheng-z5oeaq
-url: /post/iced-xue-xi-di-yi-tian-pane_grid-jiao-hu-liu-cheng-z5oeaq.html
+aliases:
+  - /post/iced-xue-xi-di-yi-tian-pane_grid-jiao-hu-liu-cheng-z5oeaq.html
 date: '2026-08-11 23:55:59+08:00'
 lastmod: '2026-08-12 00:18:03+08:00'
 toc: true
 isCJKLanguage: true
 ---
 
-
-
-# Iced 学习第一天：pane_grid 交互流程
-
-　　‍
-
-　　本文记录学习 **Iced**（Rust 的声明式 GUI 框架）第一天的收获，主题是 `pane_grid`​ 的交互流程。贯穿全文的一条主线：**UI 不是被直接操作的，而是由 State 驱动、在每次交互后重新生成的**。
+　　本文记录学习 **Iced**（Rust 的声明式 GUI 框架）第一天的收获，主题是 `pane_grid` 的交互流程。贯穿全文的一条主线：**UI 不是被直接操作的，而是由 State 驱动、在每次交互后重新生成的**。
 
 　　按「三个概念 → 布局模型 → UI 生成 → 交互流程 → 总结」的顺序展开，主要回答这几个问题：
 
 - 文章里到底有几个 `Pane`？—— 三个都叫 "Pane" 的概念怎么区分？
 - 一个 `State<Pane>` 为什么能管理多个 Pane？—— 布局树如何组织？
-- 拖拽分隔条后发生了什么？—— `ResizeEvent`​ 如何一步步传到 `update()`？
+- 拖拽分隔条后发生了什么？—— `ResizeEvent` 如何一步步传到 `update()`？
 - `view()` 里的闭包为什么执行多次？—— 每个 Pane 都会被调用一次。
 
 ---
 
 ## 一、分清三个 `Pane`
 
-　　刚开始学 `pane_grid`​，最大的坑就是：示例代码里出现了三个都叫  **"Pane"**  的东西，写法相似、职责完全不同。
+　　刚开始学 `pane_grid`，最大的坑就是：示例代码里出现了三个都叫  **"Pane"**  的东西，写法相似、职责完全不同。
 
 ```
 ① 你自己的 enum Pane —— 业务数据："这个 Pane 是什么"
@@ -73,7 +69,7 @@ enum Pane {
 - split
 - rendering
 
-　　因此 `Pane::MainPane`​ 没有 `resize()` 方法完全正常——它只是一份数据，不是控件。
+　　因此 `Pane::MainPane` 没有 `resize()` 方法完全正常——它只是一份数据，不是控件。
 
 ### 1.2 `pane_grid::Pane` —— ID（句柄）
 
@@ -83,7 +79,7 @@ enum Pane {
 pub struct Pane(u64);   // 内部就是一个编号
 ```
 
-　　它不保存任何业务数据，只回答一个问题： **"你是第几个 Pane？"**  比如第一个 Pane 的 ID 就是 `0`​（`Pane(0)`）。
+　　它不保存任何业务数据，只回答一个问题： **"你是第几个 Pane？"**  比如第一个 Pane 的 ID 就是 `0`（`Pane(0)`）。
 
 　　之所以要把 ID 交给你，是因为之后所有操作都要凭 ID 指定"操作哪个 Pane"：
 
@@ -98,7 +94,7 @@ let (split, side_pane) = panes.split(
 
 ### 1.3 `pane_grid::State<Pane>` —— 布局状态
 
-　　真正负责维护 PaneGrid 布局的是 `pane_grid::State<Pane>`​，可以把它理解成 **PaneGrid 的状态模型 / 布局树**。
+　　真正负责维护 PaneGrid 布局的是 `pane_grid::State<Pane>`，可以把它理解成 **PaneGrid 的状态模型 / 布局树**。
 
 　　例如：
 
@@ -148,8 +144,8 @@ pub fn new(first_pane_state: T) -> (Self, Pane) {
 
 　　这个函数里**同时出现了两个不同的 Pane**：
 
-- `first_pane_state: T`​ —— 参数，就是你的 `enum Pane`​（业务数据），会被存进布局树的叶子节点 `Configuration::Pane(...)` 里
-- `Pane(0)`​ —— 返回值，是 `pane_grid::Pane`​（Iced 内部的 ID / 句柄），`0` 只是编号，不携带任何业务数据
+- `first_pane_state: T` —— 参数，就是你的 `enum Pane`（业务数据），会被存进布局树的叶子节点 `Configuration::Pane(...)` 里
+- `Pane(0)` —— 返回值，是 `pane_grid::Pane`（Iced 内部的 ID / 句柄），`0` 只是编号，不携带任何业务数据
 
 　　所以写 `State::new(Pane::MainPane)` 时两个 Pane 写法相同、含义却不同：
 
@@ -161,9 +157,9 @@ State::new(Pane::MainPane)
         └── 返回 Pane(0) → ② pane_grid::Pane（ID）→ 留给你以后操作它用
 ```
 
-　　而 `let (mut panes, main) = State::new(Pane::MainPane)`​ 中：`panes`​ 是布局状态，`main` 是 ID。
+　　而 `let (mut panes, main) = State::new(Pane::MainPane)` 中：`panes` 是布局状态，`main` 是 ID。
 
-　　一句话：**​`State::new`​**​ **收的是"数据"（你的 enum），还给你的却是"ID"（**​**​`pane_grid::Pane`​**​ **）。**
+　　一句话：**`State::new`** **收的是"数据"（你的 enum），还给你的却是"ID"（****`pane_grid::Pane`** **）。**
 
 ### 1.5 记忆口诀
 
@@ -275,7 +271,7 @@ State<Pane>
                  Split
 ```
 
-　　改变的是 Split 的位置。例如 `ratio = 0.5`​ 变成 `50% | 50%`​；拖动之后 `ratio = 0.3`​ 变成 `30% | 70%`。
+　　改变的是 Split 的位置。例如 `ratio = 0.5` 变成 `50% | 50%`；拖动之后 `ratio = 0.3` 变成 `30% | 70%`。
 
 　　因此：
 
@@ -314,7 +310,7 @@ self.panes.resize(
 └────────────────────┴────────────────────┘
 ```
 
-　　所以 `State<Pane>`​ 更准确地说，是**维护了一棵 Pane/Split 布局树**。这也是为什么 `resize()`​ 属于 `State`——因为：
+　　所以 `State<Pane>` 更准确地说，是**维护了一棵 Pane/Split 布局树**。这也是为什么 `resize()` 属于 `State`——因为：
 
 ```
 Pane
@@ -378,7 +374,7 @@ pane_grid(...)
 
 　　最终 PaneGrid 根据布局树同时显示两个 Pane。所以**后一个 Pane 不会覆盖前一个 Pane**，因为闭包是"针对每一个 Pane 分别生成 Content"。
 
-### 3.2 三个参数：`pane`​ / `state`​ / `is_maximized`
+### 3.2 三个参数：`pane` / `state` / `is_maximized`
 
 ```rust
 pane_grid(&self.panes, |pane, state, is_maximized| {
@@ -445,7 +441,7 @@ pane_grid(...)
     .on_resize(10, Message::PaneResized)
 ```
 
-　　这里告诉 PaneGrid：**如果用户拖动 Split，就把 resize 事件转换成** **​`Message::PaneResized`​**​ **。**
+　　这里告诉 PaneGrid：**如果用户拖动 Split，就把 resize 事件转换成** **`Message::PaneResized`** **。**
 
 　　用户拖动分隔条后，PaneGrid 内部检测到"哪个 Split？新的 ratio 是多少？"，然后生成：
 
@@ -460,7 +456,7 @@ ResizeEvent {
 
 ### 4.2 `ResizeEvent` 是谁创建的？
 
-　　**不是用户创建，也不是我们创建，是** **​`PaneGrid`​**​ **内部产生的。**
+　　**不是用户创建，也不是我们创建，是** **`PaneGrid`** **内部产生的。**
 
 　　我们只声明：
 
@@ -478,7 +474,7 @@ enum Message {
 .on_resize(10, Message::PaneResized)
 ```
 
-　　相当于告诉 Iced：当你产生 `ResizeEvent`​ 时，请使用 `Message::PaneResized` 把它包装成我的 Message。
+　　相当于告诉 Iced：当你产生 `ResizeEvent` 时，请使用 `Message::PaneResized` 把它包装成我的 Message。
 
 　　因此：
 
@@ -497,7 +493,7 @@ Message::PaneResized(event)
 update(message)
 ```
 
-### 4.3 `event`​ 为什么可以直接出现在 `match` 里？
+### 4.3 `event` 为什么可以直接出现在 `match` 里？
 
 　　这是 Rust 模式匹配：
 
@@ -509,7 +505,7 @@ match message {
 }
 ```
 
-　　这里的 `event`​ 只是把 `Message::PaneResized` 中携带的值绑定到一个局部变量。类似：
+　　这里的 `event` 只是把 `Message::PaneResized` 中携带的值绑定到一个局部变量。类似：
 
 ```rust
 enum Message {
@@ -523,7 +519,7 @@ match message {
 }
 ```
 
-　　所以 `Message::PaneResized(event)`​ 中的 `event`​ 就是 `pane_grid::ResizeEvent`。
+　　所以 `Message::PaneResized(event)` 中的 `event` 就是 `pane_grid::ResizeEvent`。
 
 ### 4.4 `update()` 最终修改 State
 
@@ -540,7 +536,7 @@ match message {
 }
 ```
 
-　　`event.split`​ 告诉 State **修改哪一个 Split**；`event.ratio`​ 告诉 State **修改成什么比例**。
+　　`event.split` 告诉 State **修改哪一个 Split**；`event.ratio` 告诉 State **修改成什么比例**。
 
 　　例如：
 
@@ -570,15 +566,15 @@ Split
 
 　　我当时是这样理解的：
 
-> 当我用鼠标触发 resize 事件，pane_grid 会自动生成一个 `Message::ResizePane(event)`​，其中 event 是具体的 resize 数据，然后系统将这个 msg 推送给 update，update 通过 `self.panes` 找到当前的 pane，并调用他的 resize 方法调整实际的 pane 大小。
+> 当我用鼠标触发 resize 事件，pane_grid 会自动生成一个 `Message::ResizePane(event)`，其中 event 是具体的 resize 数据，然后系统将这个 msg 推送给 update，update 通过 `self.panes` 找到当前的 pane，并调用他的 resize 方法调整实际的 pane 大小。
 
 　　这个理解大方向对，但有三处细节要修正：
 
 |我的原话|更准确的说法|
 | --------------------------------------------------------| ----------------------------------------------------------------------------------------------------------------------------|
-|自动生成一个 `Message::ResizePane(event)`|生成的是 **​`ResizeEvent`​**​，再经由 `.on_resize(10, Message::PaneResized)`​ 这个回调**映射**成 `Message::PaneResized(event)`​（注意是 `PaneResized`​，不是 `ResizePane`）|
+|自动生成一个 `Message::ResizePane(event)`|生成的是 **`ResizeEvent`**，再经由 `.on_resize(10, Message::PaneResized)` 这个回调**映射**成 `Message::PaneResized(event)`（注意是 `PaneResized`，不是 `ResizePane`）|
 |系统将这个 msg 推送给 update|是 Iced 的事件循环把 Message 交给 `update()`（Elm 架构的一部分），不是"系统自动"|
-|update 通过 `self.panes` 找到当前的 pane，并调用他的 resize 方法|`self.panes`​ 里**没有"当前的 Pane"** ——`resize()`​ 收到的是 `event.split`​（哪个 Split）+ `event.ratio`​（什么比例），修改的是 **Split 的 ratio**，而不是"某个 Pane 的 resize 方法"；Pane 本身没有 resize|
+|update 通过 `self.panes` 找到当前的 pane，并调用他的 resize 方法|`self.panes` 里**没有"当前的 Pane"** ——`resize()` 收到的是 `event.split`（哪个 Split）+ `event.ratio`（什么比例），修改的是 **Split 的 ratio**，而不是"某个 Pane 的 resize 方法"；Pane 本身没有 resize|
 
 　　最后一点恰恰是第 2 章强调过的：**拖的不是 Pane，是 Split；改的不是 Pane，是 ratio。**
 
@@ -727,7 +723,7 @@ PaneGrid 重新根据 State 构建 UI
 
 　　如果以后忘了，可以只记这句话：
 
-> **​`Pane`​**​ **决定"显示什么"，**​**​`State<Pane>`​** ​ **决定"怎么布局"，**​**​`Split`​**​ **决定"怎么分割"，**​**​`ResizeEvent`​**​ **描述"用户拖成什么样"，**​**​`Message`​**​ **把事件带进应用，**​**​`update()`​** ​ **修改 State，**​**​`view()`​** ​ **再根据新的 State 生成 UI。**
+> **`Pane`** **决定"显示什么"，****`State<Pane>`**  **决定"怎么布局"，****`Split`** **决定"怎么分割"，****`ResizeEvent`** **描述"用户拖成什么样"，****`Message`** **把事件带进应用，****`update()`**  **修改 State，****`view()`**  **再根据新的 State 生成 UI。**
 
 　　最终形成：
 
@@ -747,6 +743,6 @@ view
 UI
 ```
 
-　　这就是今天通过 `pane_grid`​ 实际理解到的 **Iced 的状态驱动 GUI 模型**。
+　　这就是今天通过 `pane_grid` 实际理解到的 **Iced 的状态驱动 GUI 模型**。
 
-　　‍
+　　

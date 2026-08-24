@@ -1,13 +1,9 @@
 ---
 title: "Tinyhttpd源码阅读学习"
+category: "网络编程"
 date: 2024-04-18
 tags: ["httpd", "cgi", "源码阅读", "网络编程", "web服务器"]
-categories: ["网络编程", "源码分析"]
 ---
-
-
-
-# Tinyhttpd源码阅读学习
 
 # Tinyhttpd
 

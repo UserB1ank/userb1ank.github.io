@@ -1,13 +1,8 @@
 ---
 title: "Arch安装踩坑经验分享"
+category: "Linux"
 date: 2023-07-05
-tags: 
-categories: 
 ---
-
-
-
-# Arch安装踩坑经验分享
 
 ## 简介
 

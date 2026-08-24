@@ -1,13 +1,9 @@
 ---
 title: "LED实验"
+category: "嵌入式"
 date: 2025-09-28
 tags: ["ARM", "嵌入式"]
-categories: []
 ---
-
-
-
-# LED实验
 
 # 实验简介
 
@@ -17,7 +13,7 @@ GPIO作为板子上的一个设备，在使用之前需要使能相应设备的�
 
 CCM，全称`Clock Control Module`，这是整个芯片的时钟控制中心。I.MX6U这块板子的CCM的寄存器代号为CCM_CCGR0~CCM_CCGR6。每个寄存器有32位，
 
-‍
+
 
 ![image](/assets/images/image-20250929193154-uqdu9zz.png)
 
@@ -25,13 +21,13 @@ CCM，全称`Clock Control Module`，这是整个芯片的时钟控制中心。I
 
 ![image](/assets/images/image-20250929193220-aocot8t.png)
 
-‍
+
 
 在I.MX6U中，GPIO的命名规则为`IOMUXC_SW_MUX/PAD_CTL_PAD_GPIXX_IOXX`，本实验需要使用的GPIO3的名字为
 
-​`IOMUXC_SW_PAD_CTL_MUX_GPIO1_IO03`​和`IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO03`​，这两个的主要区别是在第三个字段，它们分别为MUX和PAD。直接翻译过来的话，MUX对应复用，PAD对应焊盘，这两个寄存器的作用与其命名一样，`MUX_GPIO1_IO03`用来设置GPIO的复用模式，因为这块芯片的GPIO不仅仅可以用作IO，还可以用作别的功能。PAD则是设置GPIO的电气属性，也就是配置GPIO，我对这些属性不了解，直接跟着教程走了。
+`IOMUXC_SW_PAD_CTL_MUX_GPIO1_IO03`和`IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO03`，这两个的主要区别是在第三个字段，它们分别为MUX和PAD。直接翻译过来的话，MUX对应复用，PAD对应焊盘，这两个寄存器的作用与其命名一样，`MUX_GPIO1_IO03`用来设置GPIO的复用模式，因为这块芯片的GPIO不仅仅可以用作IO，还可以用作别的功能。PAD则是设置GPIO的电气属性，也就是配置GPIO，我对这些属性不了解，直接跟着教程走了。
 
-当设置好了GPIO的属性和模式，就要向GPIO3中发送数据，需要设置GPIO3为输出模式，并向其中输入低电平也就是0。这个操作涉及到了另外两个寄存器，分别是`GPIOx_DR`​和`GPIOx_GDIR`。
+当设置好了GPIO的属性和模式，就要向GPIO3中发送数据，需要设置GPIO3为输出模式，并向其中输入低电平也就是0。这个操作涉及到了另外两个寄存器，分别是`GPIOx_DR`和`GPIOx_GDIR`。
 
 DR指的是DATA REGISTRY，其作用是传输数据；
 
@@ -55,7 +51,7 @@ DIR指的是DIRECTION REGISTRY，其作用是控制DR是用作输入还是输出
 
 ## 1.使能时钟
 
-‍
+
 
 从芯片参考手册中查找所有CCM_CCGR寄存器的地址，将其全部启用也就是设置为0XFFFFFFFF。
 

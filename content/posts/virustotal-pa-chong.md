@@ -1,13 +1,8 @@
 ---
 title: "Virustotal爬虫"
+category: "爬虫"
 date: 2025-11-10
-tags: 
-categories: 
 ---
-
-
-
-# Virustotal爬虫
 
 我的目的是爬取Virustotal搜集到的子域名，这里以百度为例看一下api的情况。
 
@@ -38,7 +33,7 @@ computeAntiAbuseHeader() {
                 }
 ```
 
-外部变量`e`​是当前时间的时间戳除以1000，最后被拼接到`-ZG9udCBiZSBldmls-`这串固定值的末尾。
+外部变量`e`是当前时间的时间戳除以1000，最后被拼接到`-ZG9udCBiZSBldmls-`这串固定值的末尾。
 
 ```javascript
 let e = (1 + Math.random() % 5e4) * 1e10;

@@ -1,13 +1,9 @@
 ---
 title: "DCOM学习"
+category: "网络安全"
 date: 2025-07-05
 tags: ["dcom攻击", "windows安全", "横向移动", "com对象"]
-categories: ["网络安全", "攻击技术", "Windows"]
 ---
-
-
-
-# DCOM学习
 
 # DCOM攻击原理学习
 

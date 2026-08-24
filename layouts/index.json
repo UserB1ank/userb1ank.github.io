@@ -1,6 +1,7 @@
 {{- $.Scratch.Set "posts" slice -}}
 {{- range (where .Site.RegularPages "Type" "posts") -}}
-  {{- $cat := .Params.category | default (index .Params.categories 0) -}}
+  {{- $cat := .Params.category -}}
+  {{- if not $cat -}}{{- with .Params.categories -}}{{- $cat = index . 0 -}}{{- end -}}{{- end -}}
   {{- $.Scratch.Add "posts" (dict "title" .Title "date" (.Date.Format "2006-01-02") "path" .RelPermalink "category" $cat) -}}
 {{- end -}}
 {{- $.Scratch.Get "posts" | jsonify -}}

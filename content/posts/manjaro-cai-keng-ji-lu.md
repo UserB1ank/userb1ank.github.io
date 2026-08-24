@@ -1,13 +1,8 @@
 ---
 title: "Manjaro踩坑记录"
+category: "Linux"
 date: 2025-10-17
-tags: 
-categories: 
 ---
-
-
-
-# Manjaro踩坑记录
 
 # 由安全启动引起的一系列问题
 
@@ -34,7 +29,7 @@ sudo umount /boot/efi
 sudo mkdir /efi
 ```
 
-使用`findmnt`​找到自己当前的efi分区的路径，比如`/dev/nvmexxx`
+使用`findmnt`找到自己当前的efi分区的路径，比如`/dev/nvmexxx`
 
 ```shell
 findmnt /boot/efi -no SOURCE
@@ -109,7 +104,7 @@ systemd-boot本身不支持从别的硬盘启动，但是可以通过引导UEFI 
 sudo pacman -S edk2-shell
 ```
 
-然后将`efi`​文件复制到ESP目录。注意，这里由于我们重启过了，ESP目录重新挂载到默认的`/boot/efi`​，我们需要将文件复制到这个目录中，而非wiki中所讲的`/boot`。
+然后将`efi`文件复制到ESP目录。注意，这里由于我们重启过了，ESP目录重新挂载到默认的`/boot/efi`，我们需要将文件复制到这个目录中，而非wiki中所讲的`/boot`。
 
 ```shell
 # cp /usr/share/edk2-shell/x64/Shell.efi /boot/efi/shellx64.efi
@@ -131,7 +126,7 @@ sudo blkid |grep "E026-xxxx"                                                    
 /dev/nvme0n1p1: UUID="E026-xxxx" BLOCK_SIZE="512" TYPE="vfat" PARTLABEL="Basic data partition" PARTUUID="8b9ef34a-xxxxxx"
 ```
 
-这时候我们重启机器，进入systemd-boot引导界面后会有一项`UEFI SHELL`​，选择后回车，进入UEFI SHELL界面，输入map命令，会看到各个分区的fs别名，我们需要利用fs别名去确定引导文件的位置。这里可以用`page up`​ `page down`​进行翻页，按照`partuuid`​找到我们的fs别名，格式类似`hd01f`​，`hd01b`​这样。接着输入`exit`回到linux中，创建配置文件
+这时候我们重启机器，进入systemd-boot引导界面后会有一项`UEFI SHELL`，选择后回车，进入UEFI SHELL界面，输入map命令，会看到各个分区的fs别名，我们需要利用fs别名去确定引导文件的位置。这里可以用`page up` `page down`进行翻页，按照`partuuid`找到我们的fs别名，格式类似`hd01f`，`hd01b`这样。接着输入`exit`回到linux中，创建配置文件
 
 ```shell
 vim /boot/efi/loader/entries/windows.conf
@@ -149,7 +144,7 @@ options -nointerrupt -nomap -noversion HD0b:EFI\Microsoft\Boot\Bootmgfw.efi
 
 这里我们配置用到的是`sbctl`，我们首先需要将主板的密钥配置界面，禁用出厂密钥，保存重启一次。然后再进bios,把所有密钥删除后重启进入linux。
 
-此时输入`sbctl status`​应当能够看到`setup mode`为enabled状态。
+此时输入`sbctl status`应当能够看到`setup mode`为enabled状态。
 
 接下来添加密钥
 
@@ -194,4 +189,4 @@ Secure Boot:    ✓ Enabled
 
 [双硬盘双系统](https://forum.archlinuxcn.org/t/topic/13438/3)
 
-‍
+

@@ -1,11 +1,8 @@
 ---
 title: "WifineticTwo-wp"
+category: "渗透测试"
 date: 2024-03-29
-tags: 
-categories: 
 ---
-
-# WifineticTwo-wp
 
 # WifineticTwo
 

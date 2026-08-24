@@ -1,9 +1,8 @@
 ---
 title: "Sightless-wp"
+category: "渗透测试"
 date: 2024-09-11
 ---
-
-# Sightless-wp
 
 # Sightless
 
@@ -272,4 +271,4 @@ Froxlor有个php-fpm功能，其中可以设置php重启命令，
 
 将root私钥复制出来，并且还要赋予读权限。而且每次执行命令需要新建php-fpm
 
-‍
+

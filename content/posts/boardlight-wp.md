@@ -1,11 +1,8 @@
 ---
 title: "BoardLight-wp"
+category: "渗透测试"
 date: 2024-09-18
-tags: 
-categories: 
 ---
-
-# BoardLight-wp
 
 # BoardLight
 

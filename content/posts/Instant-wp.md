@@ -1,15 +1,12 @@
 ---
 title: Instant-wp
+category: "渗透测试"
 slug: instantwp-z1t5kuz
 date: '2024-10-16 00:00:00+08:00'
 lastmod: '2026-04-14 23:48:32+08:00'
 toc: true
 isCJKLanguage: true
 ---
-
-
-
-# Instant-wp
 
 # Instant-wp
 

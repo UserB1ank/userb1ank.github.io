@@ -1,13 +1,14 @@
 {{- $categories := slice -}}
 {{- $categoryMap := dict -}}
 {{- range .Site.RegularPages -}}
-  {{- if .Params.category -}}
-    {{- $cat := .Params.category -}}
-    {{- if index $categoryMap $cat -}}
-      {{- $count := add (index $categoryMap $cat) 1 -}}
-      {{- $categoryMap = merge $categoryMap (dict $cat $count) -}}
+  {{- $cat := .Params.category -}}
+  {{- if not $cat -}}{{- with .Params.categories -}}{{- $cat = index . 0 -}}{{- end -}}{{- end -}}
+  {{- with $cat -}}
+    {{- if index $categoryMap . -}}
+      {{- $count := add (index $categoryMap .) 1 -}}
+      {{- $categoryMap = merge $categoryMap (dict . $count) -}}
     {{- else -}}
-      {{- $categoryMap = merge $categoryMap (dict $cat 1) -}}
+      {{- $categoryMap = merge $categoryMap (dict . 1) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

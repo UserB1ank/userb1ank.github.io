@@ -1,7 +1,8 @@
 {{- $.Scratch.Set "categories" slice -}}
 {{- range .Site.Home.RegularPages -}}
-  {{- if .Params.category -}}
-    {{- $cat := .Params.category -}}
+  {{- $cat := .Params.category -}}
+  {{- if not $cat -}}{{- with .Params.categories -}}{{- $cat = index . 0 -}}{{- end -}}{{- end -}}
+  {{- with $cat -}}
     {{- $found := false -}}
     {{- range $.Scratch.GetSortedMapValues "categories" -}}
       {{- if eq .name $cat -}}
@@ -9,7 +10,13 @@
       {{- end -}}
     {{- end -}}
     {{- if not $found -}}
-      {{- $.Scratch.Add "categories" (dict "name" $cat "count" (len (where $.Site.RegularPages "Params.category" $cat))) -}}
+      {{- $count := 0 -}}
+      {{- range $.Site.RegularPages -}}
+        {{- $pc := .Params.category -}}
+        {{- if not $pc -}}{{- with .Params.categories -}}{{- $pc = index . 0 -}}{{- end -}}{{- end -}}
+        {{- if eq $pc $cat -}}{{- $count = add $count 1 -}}{{- end -}}
+      {{- end -}}
+      {{- $.Scratch.Add "categories" (dict "name" $cat "count" $count) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
